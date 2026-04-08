@@ -4,7 +4,7 @@ import Layout from '../components/Layout';
 import RoadmapCard from '../components/RoadmapCard';
 import JobCard from '../components/JobCard';
 import Chatbot from '../components/Chatbot';
-import SkillChart from '../components/charts/SkillChart';
+import SkillBubble from '../components/charts/SkillBubble';
 import LearningDNAChart from '../components/charts/LearningDNAChart';
 import ProgressChart from '../components/charts/ProgressChart';
 import MatchCircle from '../components/charts/MatchCircle';
@@ -68,21 +68,6 @@ export default function Dashboard() {
   const todayInsight = allMissing.length
     ? `Focus on ${allMissing[0]} today. Learners who close one targeted gap per week improve job-match quality significantly.`
     : 'Your core profile is strong. Improve interview narratives and ship one portfolio project this week.';
-
-  const learningDNAData = useMemo(() => {
-    const strongSkills = (user?.skills || []).filter((skill) => String(skill?.strength || '').toLowerCase() === 'strong').length;
-    const mediumSkills = (user?.skills || []).filter((skill) => String(skill?.strength || '').toLowerCase() === 'medium').length;
-    const weakSkills = (user?.skills || []).filter((skill) => String(skill?.strength || '').toLowerCase() === 'weak').length;
-
-    return [
-      { subject: 'Problem Solving', score: Math.min(96, 64 + strongSkills * 8) },
-      { subject: 'Creativity', score: Math.min(92, 56 + mediumSkills * 9) },
-      { subject: 'Communication', score: Math.min(90, 60 + (userSkills.length > 2 ? 12 : 6)) },
-      { subject: 'Technical', score: Math.min(98, 58 + userSkills.length * 6) },
-      { subject: 'Leadership', score: Math.max(42, 68 - weakSkills * 6) },
-      { subject: 'Adaptability', score: Math.max(50, 84 - allMissing.length * 3) },
-    ];
-  }, [allMissing.length, user?.skills, userSkills.length]);
 
   const progressTrend = useMemo(() => {
     const base = userSkills.length > 0 ? 30 : 20;
@@ -225,8 +210,8 @@ export default function Dashboard() {
 
           {/* Visual analytics */}
           <div className="grid gap-6 lg:grid-cols-2 mb-6">
-            <LearningDNAChart profile={learningDNAData} />
-            <SkillChart skills={user?.skills} />
+            <LearningDNAChart user={user} />
+            <SkillBubble skills={user?.skills} />
           </div>
 
           <div className="mb-8 rounded-2xl border border-white/10 bg-slate-900/35 p-4 backdrop-blur-xl">
