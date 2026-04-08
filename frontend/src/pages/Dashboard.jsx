@@ -1,10 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import RoadmapCard from '../components/RoadmapCard';
 import JobCard from '../components/JobCard';
-import LearningDNACard from '../components/LearningDNACard';
 import Chatbot from '../components/Chatbot';
+import SkillChart from '../components/charts/SkillChart';
+import LearningDNAChart from '../components/charts/LearningDNAChart';
+import ProgressChart from '../components/charts/ProgressChart';
+import MatchCircle from '../components/charts/MatchCircle';
+import AnimatedStat from '../components/charts/AnimatedStat';
 import {
   getRecommendedJobs,
   getResources,
@@ -61,15 +65,49 @@ export default function Dashboard() {
 
   const userSkills = (user?.skills || []).map((s) => s.name);
   const allMissing = [...new Set(jobs.flatMap((j) => j.missingSkills || []))].slice(0, 6);
-  const skillProgress = userSkills.slice(0, 5).map((skill, idx) => ({
-    name: skill,
-    value: Math.min(92, 46 + idx * 9 + (skill.length % 12)),
-  }));
-
-  const learningStyle = user?.preferredTrack?.toLowerCase() === 'design' ? 'visual' : 'hybrid';
   const todayInsight = allMissing.length
     ? `Focus on ${allMissing[0]} today. Learners who close one targeted gap per week improve job-match quality significantly.`
     : 'Your core profile is strong. Improve interview narratives and ship one portfolio project this week.';
+
+  const learningDNAData = useMemo(() => {
+    const strongSkills = (user?.skills || []).filter((skill) => String(skill?.strength || '').toLowerCase() === 'strong').length;
+    const mediumSkills = (user?.skills || []).filter((skill) => String(skill?.strength || '').toLowerCase() === 'medium').length;
+    const weakSkills = (user?.skills || []).filter((skill) => String(skill?.strength || '').toLowerCase() === 'weak').length;
+
+    return [
+      { subject: 'Problem Solving', score: Math.min(96, 64 + strongSkills * 8) },
+      { subject: 'Creativity', score: Math.min(92, 56 + mediumSkills * 9) },
+      { subject: 'Communication', score: Math.min(90, 60 + (userSkills.length > 2 ? 12 : 6)) },
+      { subject: 'Technical', score: Math.min(98, 58 + userSkills.length * 6) },
+      { subject: 'Leadership', score: Math.max(42, 68 - weakSkills * 6) },
+      { subject: 'Adaptability', score: Math.max(50, 84 - allMissing.length * 3) },
+    ];
+  }, [allMissing.length, user?.skills, userSkills.length]);
+
+  const progressTrend = useMemo(() => {
+    const base = userSkills.length > 0 ? 30 : 20;
+    return [
+      { week: 'Week 1', score: base },
+      { week: 'Week 2', score: Math.min(100, base + 12) },
+      { week: 'Week 3', score: Math.min(100, base + 24) },
+      { week: 'Week 4', score: Math.min(100, base + 35) },
+      { week: 'Week 5', score: Math.min(100, base + 47) },
+      { week: 'Week 6', score: Math.min(100, base + 58) },
+    ];
+  }, [userSkills.length]);
+
+  const studentsLikeYouBars = [
+    { role: 'Software Engineer', value: 85 },
+    { role: 'Data Analyst', value: 70 },
+    { role: 'UI/UX Designer', value: 50 },
+  ];
+
+  const jobMatchScores = jobs
+    .map((job) => Number(job?.matchScore))
+    .filter((value) => Number.isFinite(value));
+  const averageMatchScore = jobMatchScores.length
+    ? Math.round(jobMatchScores.reduce((sum, value) => sum + value, 0) / jobMatchScores.length)
+    : 40;
 
   const getSkillTagClass = (skill) => {
     const key = String(skill || '').toLowerCase();
@@ -185,46 +223,23 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Learning DNA + Insight */}
-          <div className="grid gap-6 lg:grid-cols-3 mb-8">
-            <div className="lg:col-span-2">
-              <LearningDNACard
-                learningStyle={learningStyle}
-                strengths={userSkills.slice(0, 3)}
-                weakAreas={allMissing.slice(0, 3)}
-                dropoutRisk={allMissing.length ? 34 : 18}
-                careerMatch={roadmaps.length ? 'Strong fit for your current target roles and roadmap choices.' : 'Good fit, but you should create a roadmap to sharpen career direction.'}
-              />
-              <div className="mt-4 rounded-2xl border border-white/10 bg-slate-900/35 p-4 backdrop-blur-xl">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
-                  <p className="text-sm text-cyan-200 font-medium">Today&apos;s Insight</p>
-                </div>
-                <p className="text-sm text-gray-300 leading-relaxed">{todayInsight}</p>
-                <p className="text-xs text-gray-500 mt-2">Improvement potential: {allMissing.length ? '24%' : '11%'} this week by focusing on one narrow gap.</p>
-              </div>
-            </div>
+          {/* Visual analytics */}
+          <div className="grid gap-6 lg:grid-cols-2 mb-6">
+            <LearningDNAChart profile={learningDNAData} />
+            <SkillChart skills={user?.skills} />
+          </div>
 
-            <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 shadow-[0_0_40px_rgba(0,0,0,0.35)]">
-              <h3 className="font-semibold text-white text-lg mb-4">Skill Improvement</h3>
-              {skillProgress.length ? (
-                <div className="space-y-4">
-                  {skillProgress.map((item) => (
-                    <div key={item.name}>
-                      <div className="flex items-center justify-between text-xs mb-1.5">
-                        <span className="text-gray-300">{item.name}</span>
-                        <span className="text-cyan-300 font-semibold">{item.value}%</span>
-                      </div>
-                      <div className="h-2 rounded-full bg-slate-800 overflow-hidden border border-white/5">
-                        <div className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-700" style={{ width: `${item.value}%` }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-400">Add skills in profile to track progress trends.</p>
-              )}
+          <div className="mb-8 rounded-2xl border border-white/10 bg-slate-900/35 p-4 backdrop-blur-xl">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
+              <p className="text-sm text-cyan-200 font-medium">Today&apos;s Insight</p>
             </div>
+            <p className="text-sm text-gray-300 leading-relaxed">{todayInsight}</p>
+            <p className="text-xs text-gray-500 mt-2">Improvement potential: {allMissing.length ? '24%' : '11%'} this week by focusing on one narrow gap.</p>
+          </div>
+
+          <div className="mb-8">
+            <ProgressChart data={progressTrend} />
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3 mb-8">
@@ -232,27 +247,58 @@ export default function Dashboard() {
               <div className="flex items-center justify-between mb-5">
                 <div>
                   <p className="text-xs uppercase tracking-[0.2em] text-cyan-300/80 mb-2">Students like you</p>
-                  <h3 className="text-xl font-semibold text-white">Social proof for judges and learners</h3>
+                  <h3 className="text-xl font-semibold text-white">Social proof with motion and visual comparison</h3>
                 </div>
                 <span className="px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/15 border border-cyan-400/30 text-cyan-200">Live benchmarks</span>
               </div>
+
               <div className="grid md:grid-cols-3 gap-4">
-                {[
-                  { metric: '85%', label: 'similar learners became Software Engineers' },
-                  { metric: '78%', label: 'improved job match score in 30 days' },
-                  { metric: '4.8/5', label: 'average confidence in portfolio reviews' },
-                ].map((item) => (
-                  <div key={item.metric} className="rounded-2xl border border-white/10 bg-slate-900/35 p-5">
-                    <p className="text-2xl font-bold text-cyan-300">{item.metric}</p>
-                    <p className="mt-2 text-sm text-slate-300 leading-relaxed">{item.label}</p>
+                <AnimatedStat
+                  value={85}
+                  suffix="%"
+                  label="similar learners became Software Engineers"
+                  accent="text-cyan-300"
+                />
+                <AnimatedStat
+                  value={78}
+                  suffix="%"
+                  label="improved job match score in 30 days"
+                  accent="text-purple-300"
+                />
+                <AnimatedStat
+                  value={4.8}
+                  suffix="/5"
+                  decimals={1}
+                  label="average confidence in portfolio reviews"
+                  accent="text-emerald-300"
+                />
+              </div>
+
+              <div className="mt-6 space-y-3 rounded-2xl border border-white/10 bg-slate-900/35 p-4">
+                {studentsLikeYouBars.map((item) => (
+                  <div key={item.role}>
+                    <div className="mb-1.5 flex items-center justify-between text-sm">
+                      <span className="text-slate-300">{item.role}</span>
+                      <span className="font-semibold text-cyan-200">{item.value}%</span>
+                    </div>
+                    <div className="h-2.5 rounded-full border border-white/10 bg-slate-800 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-purple-500 to-cyan-400 transition-all duration-700"
+                        style={{ width: `${item.value}%` }}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
+
             <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 backdrop-blur-xl p-6 shadow-[0_0_40px_rgba(0,0,0,0.35)]">
               <p className="text-xs uppercase tracking-[0.2em] text-cyan-300/80 mb-2">Career match</p>
               <p className="text-lg font-semibold text-white">Your profile is trending toward high-fit roles</p>
-              <p className="mt-3 text-sm text-slate-300 leading-relaxed">The more complete your Learning DNA becomes, the sharper your recommendations become across jobs, resources, and chatbot guidance.</p>
+              <div className="my-5 flex justify-center">
+                <MatchCircle score={averageMatchScore} />
+              </div>
+              <p className="text-sm text-slate-300 leading-relaxed">The more complete your Learning DNA becomes, the sharper your recommendations become across jobs, resources, and chatbot guidance.</p>
             </div>
           </div>
 

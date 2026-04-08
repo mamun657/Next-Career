@@ -3,6 +3,7 @@ const Roadmap = require('../models/Roadmap');
 const { extractSkillsFromText } = require('../utils/skillExtractor');
 const { generateRoadmapSteps } = require('../utils/roadmapGenerator');
 const { getBotResponse } = require('../utils/careerBot');
+const pdfParse = require('pdf-parse');
 
 /**
  * Skill Extraction from CV text
@@ -136,14 +137,8 @@ exports.extractSkillsFromPDF = async (req, res) => {
       return res.status(400).json({ message: 'PDF file is required.' });
     }
 
-    // Dynamically import pdf-parse
-    let pdfParse;
-    try {
-      pdfParse = require('pdf-parse');
-    } catch (e) {
-      return res.status(500).json({ 
-        message: 'PDF parsing is not available. Please install pdf-parse package.' 
-      });
+    if (!req.file.buffer || !Buffer.isBuffer(req.file.buffer)) {
+      return res.status(400).json({ message: 'Uploaded file buffer is missing. Use multer memory storage.' });
     }
 
     // Parse PDF buffer

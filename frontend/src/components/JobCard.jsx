@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import MatchCircle from './charts/MatchCircle';
 
 export default function JobCard({ job, isSelected = false }) {
   const getSkillTagClass = (skill) => {
@@ -27,11 +28,11 @@ export default function JobCard({ job, isSelected = false }) {
           <h4 className="font-semibold text-white text-lg group-hover:text-cyan-300 transition-colors">{job.title}</h4>
           <p className="text-gray-400 mt-1">{job.company}</p>
         </div>
-        {job.matchScore && (
-          <span className="shrink-0 px-3 py-1.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 border border-cyan-400/40 rounded-full text-white text-sm font-semibold shadow-lg shadow-cyan-500/25">
-            {job.matchScore}%
-          </span>
-        )}
+        {job.matchScore ? (
+          <div className="shrink-0">
+            <MatchCircle score={job.matchScore} size={78} />
+          </div>
+        ) : null}
       </div>
 
       <div className="mt-4 flex items-center gap-3 text-sm text-gray-500">
