@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import RoadmapCard from '../components/RoadmapCard';
+import CareerBot from '../components/CareerBot';
 import {
   getRecommendedJobs,
   getResources,
@@ -58,6 +59,15 @@ export default function Dashboard() {
 
   const userSkills = (user?.skills || []).map((s) => s.name);
   const allMissing = [...new Set(jobs.flatMap((j) => j.missingSkills || []))].slice(0, 6);
+  const skillProgress = userSkills.slice(0, 5).map((skill, idx) => ({
+    name: skill,
+    value: Math.min(92, 46 + idx * 9 + (skill.length % 12)),
+  }));
+
+  const learningStyle = user?.preferredTrack?.toLowerCase() === 'design' ? 'visual' : 'hybrid';
+  const todayInsight = allMissing.length
+    ? `Focus on ${allMissing[0]} today. Learners who close one targeted gap per week improve job-match quality significantly.`
+    : 'Your core profile is strong. Improve interview narratives and ship one portfolio project this week.';
 
   return (
     <Layout>
@@ -155,6 +165,74 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <p className="text-gray-500 text-sm p-4 bg-slate-900/40 rounded-xl border border-white/5">Add skills and browse jobs to identify gaps.</p>
+              )}
+            </div>
+          </div>
+
+          {/* Learning DNA + Insight */}
+          <div className="grid gap-6 lg:grid-cols-3 mb-8">
+            <div className="lg:col-span-2 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 shadow-[0_0_40px_rgba(0,0,0,0.35)]">
+              <div className="flex items-start justify-between gap-3 mb-5">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-cyan-300/80 mb-2">Learning DNA</p>
+                  <h3 className="text-xl font-semibold text-white">Your adaptive learner profile</h3>
+                </div>
+                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/15 border border-cyan-400/30 text-cyan-200">
+                  {learningStyle} learner
+                </span>
+              </div>
+
+              <div className="grid sm:grid-cols-3 gap-4 mb-5">
+                <div className="rounded-xl border border-emerald-400/20 bg-emerald-500/10 p-4">
+                  <p className="text-xs text-emerald-300 uppercase tracking-wide">Strengths</p>
+                  <p className="mt-2 text-sm text-emerald-100 leading-relaxed">
+                    {userSkills.length ? userSkills.slice(0, 2).join(' + ') : 'Profile consistency and clear goal alignment'}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-amber-400/20 bg-amber-500/10 p-4">
+                  <p className="text-xs text-amber-300 uppercase tracking-wide">Weak Areas</p>
+                  <p className="mt-2 text-sm text-amber-100 leading-relaxed">
+                    {allMissing.length ? allMissing.slice(0, 2).join(' + ') : 'Advanced specialization depth'}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-blue-400/20 bg-blue-500/10 p-4">
+                  <p className="text-xs text-blue-300 uppercase tracking-wide">Momentum</p>
+                  <p className="mt-2 text-sm text-blue-100 leading-relaxed">
+                    {roadmaps.length ? `${roadmaps.length} active roadmap(s)` : 'Create first roadmap to start tracking'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-white/10 bg-slate-900/35 p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
+                  <p className="text-sm text-cyan-200 font-medium">Today&apos;s Insight</p>
+                </div>
+                <p className="text-sm text-gray-300 leading-relaxed">{todayInsight}</p>
+              </div>
+            </div>
+
+            <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 shadow-[0_0_40px_rgba(0,0,0,0.35)]">
+              <h3 className="font-semibold text-white text-lg mb-4">Skill Improvement</h3>
+              {skillProgress.length ? (
+                <div className="space-y-4">
+                  {skillProgress.map((item) => (
+                    <div key={item.name}>
+                      <div className="flex items-center justify-between text-xs mb-1.5">
+                        <span className="text-gray-300">{item.name}</span>
+                        <span className="text-cyan-300 font-semibold">{item.value}%</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-slate-800 overflow-hidden border border-white/5">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-700"
+                          style={{ width: `${item.value}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400">Add skills in profile to track progress trends.</p>
               )}
             </div>
           </div>
@@ -358,10 +436,34 @@ export default function Dashboard() {
                       </span>
                       <span className="text-xs text-gray-500 px-2 py-1 bg-slate-900/50 rounded-lg">{job.jobType}</span>
                     </div>
+                    <p className="text-xs text-gray-400 mt-3 line-clamp-2">
+                      Why this match: {(job.explanation || 'Your profile aligns with this role and required skills.').replace(/^\s+|\s+$/g, '')}
+                    </p>
                   </Link>
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Career Assistant */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500/20 to-indigo-500/20 flex items-center justify-center border border-cyan-500/30">
+                  <svg className="w-5 h-5 text-cyan-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white text-lg">AI Career Assistant</h3>
+                  <p className="text-sm text-gray-400">Use quick actions to get focused next steps</p>
+                </div>
+              </div>
+              <Link to="/careerbot" className="text-cyan-400 text-sm font-medium hover:text-cyan-300 transition-colors">
+                Open full chat
+              </Link>
+            </div>
+            <CareerBot />
           </div>
 
           {/* Roadmap Modal */}

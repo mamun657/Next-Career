@@ -224,44 +224,56 @@ export default function Jobs() {
                   {/* Match Analysis */}
                   <div className="p-6 space-y-6">
                     <div className="p-4 bg-slate-900/50 rounded-xl border border-white/5">
-                      <p className="text-gray-300 leading-relaxed">{detail.explanation}</p>
-                    </div>
-
-                    {/* Matched Skills */}
-                    <div>
-                      <p className="text-base font-semibold text-white mb-3 flex items-center gap-2">
-                        <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Skills you have
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {(detail.matchedSkills || []).length > 0 ? (
-                          detail.matchedSkills.map((s) => (
-                            <span key={s} className="text-sm bg-emerald-500/20 text-emerald-300 px-3 py-1.5 rounded-full font-medium border border-emerald-500/30">{s}</span>
-                          ))
-                        ) : (
-                          <span className="text-gray-500">No matching skills</span>
-                        )}
+                      <p className="text-xs uppercase tracking-[0.2em] text-cyan-300/70 mb-2">Why this match?</p>
+                      <p className="text-gray-200 leading-relaxed">{detail.explanation}</p>
+                      <div className="mt-4 grid sm:grid-cols-2 gap-3">
+                        <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3">
+                          <p className="text-xs text-emerald-300 uppercase tracking-wide">Matched</p>
+                          <p className="text-sm text-emerald-100 mt-1">{(detail.matchedSkills || []).length} core skills align with this role</p>
+                        </div>
+                        <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3">
+                          <p className="text-xs text-amber-300 uppercase tracking-wide">Gap</p>
+                          <p className="text-sm text-amber-100 mt-1">{(detail.missingSkills || []).length} skills need focused improvement</p>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Missing Skills */}
-                    <div>
-                      <p className="text-base font-semibold text-white mb-3 flex items-center gap-2">
-                        <svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                        Skills to develop
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {(detail.missingSkills || []).length > 0 ? (
-                          detail.missingSkills.map((s) => (
-                            <span key={s} className="text-sm bg-amber-500/20 text-amber-300 px-3 py-1.5 rounded-full font-medium border border-amber-500/30">{s}</span>
-                          ))
-                        ) : (
-                          <span className="text-emerald-400 font-medium">You have all required skills!</span>
-                        )}
+                    {/* Matched Skills */}
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-base font-semibold text-white mb-3 flex items-center gap-2">
+                          <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Matched skills
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {(detail.matchedSkills || []).length > 0 ? (
+                            detail.matchedSkills.map((s) => (
+                              <span key={s} className="text-sm bg-emerald-500/20 text-emerald-300 px-3 py-1.5 rounded-full font-medium border border-emerald-500/30">{s}</span>
+                            ))
+                          ) : (
+                            <span className="text-gray-500">No matching skills</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="text-base font-semibold text-white mb-3 flex items-center gap-2">
+                          <svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                          </svg>
+                          Missing skills
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {(detail.missingSkills || []).length > 0 ? (
+                            detail.missingSkills.map((s) => (
+                              <span key={s} className="text-sm bg-amber-500/20 text-amber-300 px-3 py-1.5 rounded-full font-medium border border-amber-500/30">{s}</span>
+                            ))
+                          ) : (
+                            <span className="text-emerald-400 font-medium">You have all required skills!</span>
+                          )}
+                        </div>
                       </div>
                     </div>
 
