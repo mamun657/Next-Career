@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
+import ResourceCard from '../components/ResourceCard';
 import { getResources } from '../services/api';
 
 export default function Resources() {
@@ -94,47 +95,7 @@ export default function Resources() {
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {resources.map((r) => (
-                <a
-                  key={r._id}
-                  href={r.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group block bg-white/[0.04] backdrop-blur-xl rounded-2xl border border-white/[0.08] overflow-hidden hover:border-purple-500/30 hover:shadow-xl hover:shadow-purple-500/5 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02]"
-                >
-                  <div className="p-6">
-                    <div className="flex items-start justify-between gap-3 mb-4">
-                      <h4 className="font-semibold text-white text-lg group-hover:text-purple-300 transition-colors leading-tight">{r.title}</h4>
-                      <span className={`shrink-0 text-sm font-semibold px-3 py-1.5 rounded-full ${
-                        r.cost === 'Free' 
-                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' 
-                          : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                      }`}>
-                        {r.cost}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                      </svg>
-                      <p className="text-gray-400">{r.platform}</p>
-                    </div>
-                    <p className="text-gray-400 line-clamp-2 leading-relaxed">{r.description}</p>
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      {(r.skills || []).slice(0, 3).map((s) => (
-                        <span key={s} className="text-sm bg-purple-500/20 text-purple-300 px-3 py-1 rounded-lg font-medium border border-purple-500/20">{s}</span>
-                      ))}
-                      {(r.skills || []).length > 3 && (
-                        <span className="text-sm text-gray-500 px-2 py-1">+{r.skills.length - 3}</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="px-6 py-4 bg-slate-900/40 border-t border-white/[0.05] flex items-center justify-between">
-                    <span className="text-purple-400 font-semibold group-hover:text-purple-300 transition-colors">View resource</span>
-                    <svg className="w-5 h-5 text-purple-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
-                  </div>
-                </a>
+                <ResourceCard key={r._id} resource={r} />
               ))}
             </div>
           )}

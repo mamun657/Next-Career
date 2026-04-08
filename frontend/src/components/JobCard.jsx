@@ -1,7 +1,22 @@
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { BriefcaseBusiness, ChartNoAxesColumn, Code2, FlaskConical, Palette, ServerCog, Smartphone } from 'lucide-react';
 import MatchCircle from './charts/MatchCircle';
+import { getCompanyLogo, getJobIcon, getSkillIcon } from '../utils/imageHelpers';
+
+const roleIconMap = {
+  palette: Palette,
+  chart: ChartNoAxesColumn,
+  server: ServerCog,
+  code: Code2,
+  smartphone: Smartphone,
+  flask: FlaskConical,
+  briefcase: BriefcaseBusiness,
+};
 
 export default function JobCard({ job, isSelected = false }) {
+  const [logoError, setLogoError] = useState(false);
+
   const getSkillTagClass = (skill) => {
     const key = String(skill || '').toLowerCase();
     if (key.includes('react')) return 'bg-blue-500/20 text-blue-300 border-blue-500/35';
@@ -14,6 +29,10 @@ export default function JobCard({ job, isSelected = false }) {
     return 'bg-cyan-500/20 text-cyan-300 border-cyan-500/35';
   };
 
+  const roleKey = getJobIcon(job?.title || '');
+  const RoleIcon = roleIconMap[roleKey] || BriefcaseBusiness;
+  const logoUrl = getCompanyLogo(job?.company || '');
+
   return (
     <Link
       to={`/jobs/${job._id}`}
@@ -24,9 +43,29 @@ export default function JobCard({ job, isSelected = false }) {
       }`}
     >
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <h4 className="font-semibold text-white text-lg group-hover:text-cyan-300 transition-colors">{job.title}</h4>
-          <p className="text-gray-400 mt-1">{job.company}</p>
+        <div className="flex items-start gap-3 min-w-0">
+          <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0 shadow-lg border border-white/10 bg-slate-800/70">
+            {!logoError ? (
+              <img
+                src={logoUrl}
+                alt={job.company}
+                className="w-full h-full object-cover"
+                onError={() => setLogoError(true)}
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm">
+                {job.company?.slice(0, 2)?.toUpperCase() || 'CO'}
+              </div>
+            )}
+          </div>
+
+          <div className="min-w-0">
+            <h4 className="font-semibold text-white text-lg group-hover:text-cyan-300 transition-colors flex items-center gap-2 truncate">
+              <RoleIcon className="w-4 h-4 text-cyan-300 shrink-0" />
+              <span className="truncate">{job.title}</span>
+            </h4>
+            <p className="text-gray-400 mt-1 truncate">{job.company}</p>
+          </div>
         </div>
         {job.matchScore ? (
           <div className="shrink-0">
@@ -45,7 +84,17 @@ export default function JobCard({ job, isSelected = false }) {
 
       <div className="mt-4 flex flex-wrap gap-2">
         {(job.requiredSkills || []).slice(0, 4).map((s) => (
-          <span key={s} className={`text-sm px-3 py-1 rounded-lg font-medium border ${getSkillTagClass(s)}`}>
+          <span key={s} className={`text-sm px-3 py-1 rounded-lg font-medium border inline-flex items-center gap-1.5 ${getSkillTagClass(s)}`}>
+            {getSkillIcon(s) ? (
+              <img
+                src={getSkillIcon(s)}
+                alt={s}
+                className="w-3.5 h-3.5 object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            ) : null}
             {s}
           </span>
         ))}
