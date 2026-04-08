@@ -71,6 +71,18 @@ export default function Dashboard() {
     ? `Focus on ${allMissing[0]} today. Learners who close one targeted gap per week improve job-match quality significantly.`
     : 'Your core profile is strong. Improve interview narratives and ship one portfolio project this week.';
 
+  const getSkillTagClass = (skill) => {
+    const key = String(skill || '').toLowerCase();
+    if (key.includes('react')) return 'bg-blue-500/20 text-blue-300 border-blue-500/35';
+    if (key.includes('python')) return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/35';
+    if (key.includes('node')) return 'bg-green-500/20 text-green-300 border-green-500/35';
+    if (key.includes('mongo')) return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/35';
+    if (key.includes('figma')) return 'bg-purple-500/20 text-purple-300 border-purple-500/35';
+    if (key.includes('express')) return 'bg-indigo-500/20 text-indigo-300 border-indigo-500/35';
+    if (key.includes('sql')) return 'bg-orange-500/20 text-orange-300 border-orange-500/35';
+    return 'bg-cyan-500/20 text-cyan-300 border-cyan-500/35';
+  };
+
   return (
     <Layout>
       <div className="min-h-screen bg-gradient-to-br from-[#0a0f1a] via-[#0d1526] to-[#1a1033] -mx-4 -mt-8 px-4 py-8 sm:px-6 lg:px-8">
@@ -82,12 +94,14 @@ export default function Dashboard() {
 
         <div className="max-w-6xl mx-auto relative z-10">
           {/* Welcome Header Card */}
-          <div className="mb-10 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-8 shadow-[0_0_40px_rgba(0,0,0,0.4)]">
+          <div className="mb-10 bg-gradient-to-r from-white/5 via-purple-500/[0.06] to-cyan-500/[0.06] backdrop-blur-xl rounded-2xl border border-white/10 p-8 shadow-[0_0_40px_rgba(0,0,0,0.4)]">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-                <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 overflow-hidden p-1">
+                <img
+                  src="/icons/welcome-badge.png"
+                  alt="Welcome"
+                  className="w-full h-full object-cover scale-125"
+                />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-3">
@@ -160,7 +174,7 @@ export default function Dashboard() {
               ) : allMissing.length ? (
                 <div className="flex flex-wrap gap-2">
                   {allMissing.map((s) => (
-                    <span key={s} className="px-4 py-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-full text-amber-300 text-sm font-medium hover:border-amber-400/50 transition-all">
+                    <span key={s} className={`px-4 py-2 rounded-full text-sm font-medium transition-all hover:scale-[1.02] ${getSkillTagClass(s)}`}>
                       {s}
                     </span>
                   ))}

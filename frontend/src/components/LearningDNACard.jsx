@@ -8,7 +8,7 @@ export default function LearningDNACard({
   const risk = Math.max(0, Math.min(100, dropoutRisk));
 
   return (
-    <section className="group bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 shadow-[0_0_40px_rgba(0,0,0,0.35)] hover:border-cyan-500/30 transition-all duration-300">
+    <section className="group bg-white/5 backdrop-blur-xl rounded-2xl border border-purple-500/30 p-6 shadow-[0_0_30px_rgba(124,58,237,0.18)] hover:shadow-[0_0_42px_rgba(124,58,237,0.24)] hover:border-purple-400/45 transition-all duration-300">
       <div className="flex items-start justify-between gap-4 mb-5">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-cyan-300/80 mb-2">Learning DNA</p>

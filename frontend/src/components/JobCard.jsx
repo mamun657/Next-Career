@@ -1,6 +1,18 @@
 import { Link } from 'react-router-dom';
 
 export default function JobCard({ job, isSelected = false }) {
+  const getSkillTagClass = (skill) => {
+    const key = String(skill || '').toLowerCase();
+    if (key.includes('react')) return 'bg-blue-500/20 text-blue-300 border-blue-500/35';
+    if (key.includes('python')) return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/35';
+    if (key.includes('node')) return 'bg-green-500/20 text-green-300 border-green-500/35';
+    if (key.includes('mongo')) return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/35';
+    if (key.includes('figma')) return 'bg-purple-500/20 text-purple-300 border-purple-500/35';
+    if (key.includes('express')) return 'bg-indigo-500/20 text-indigo-300 border-indigo-500/35';
+    if (key.includes('sql')) return 'bg-orange-500/20 text-orange-300 border-orange-500/35';
+    return 'bg-cyan-500/20 text-cyan-300 border-cyan-500/35';
+  };
+
   return (
     <Link
       to={`/jobs/${job._id}`}
@@ -16,7 +28,7 @@ export default function JobCard({ job, isSelected = false }) {
           <p className="text-gray-400 mt-1">{job.company}</p>
         </div>
         {job.matchScore && (
-          <span className="shrink-0 px-3 py-1.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 rounded-full text-cyan-300 text-sm font-semibold">
+          <span className="shrink-0 px-3 py-1.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 border border-cyan-400/40 rounded-full text-white text-sm font-semibold shadow-lg shadow-cyan-500/25">
             {job.matchScore}%
           </span>
         )}
@@ -32,7 +44,7 @@ export default function JobCard({ job, isSelected = false }) {
 
       <div className="mt-4 flex flex-wrap gap-2">
         {(job.requiredSkills || []).slice(0, 4).map((s) => (
-          <span key={s} className="text-sm bg-slate-800/60 text-gray-300 px-3 py-1 rounded-lg font-medium border border-white/5">
+          <span key={s} className={`text-sm px-3 py-1 rounded-lg font-medium border ${getSkillTagClass(s)}`}>
             {s}
           </span>
         ))}
