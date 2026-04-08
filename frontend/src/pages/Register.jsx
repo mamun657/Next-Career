@@ -34,7 +34,11 @@ export default function Register() {
       authLogin(res.data.user, res.data.token);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed.');
+      if (!err.response) {
+        setError('Cannot reach server. Check API URL and backend CORS settings.');
+      } else {
+        setError(err.response?.data?.message || 'Registration failed.');
+      }
     } finally {
       setLoading(false);
     }
