@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Layout from '../components/Layout';
+import JobCard from '../components/JobCard';
 import { getJobs, getJobMatchDetail } from '../services/api';
 
 export default function Jobs() {
@@ -128,50 +129,7 @@ export default function Jobs() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {jobs.map((job) => (
-                    <Link
-                      key={job._id}
-                      to={`/jobs/${job._id}`}
-                      className={`group block bg-white/[0.04] backdrop-blur-xl rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-1 ${
-                        id === job._id 
-                          ? 'border-cyan-500/60 shadow-xl shadow-cyan-500/15 bg-gradient-to-r from-cyan-500/[0.08] to-blue-500/[0.08] ring-1 ring-cyan-500/30' 
-                          : 'border-white/[0.08] hover:border-cyan-500/30 hover:shadow-xl hover:shadow-cyan-500/5'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <h4 className="font-semibold text-white text-lg group-hover:text-cyan-300 transition-colors">{job.title}</h4>
-                          <p className="text-gray-400 mt-1">{job.company}</p>
-                        </div>
-                        {job.matchScore && (
-                          <span className="shrink-0 px-3 py-1.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 rounded-full text-cyan-300 text-sm font-semibold">
-                            {job.matchScore}%
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-4 flex items-center gap-3 text-sm text-gray-500">
-                        <span className="flex items-center gap-1.5">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                          {job.location}
-                        </span>
-                        <span className="w-1 h-1 bg-gray-600 rounded-full" />
-                        <span>{job.jobType}</span>
-                        <span className="w-1 h-1 bg-gray-600 rounded-full" />
-                        <span>{job.experienceLevel}</span>
-                      </div>
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {(job.requiredSkills || []).slice(0, 4).map((s) => (
-                          <span key={s} className="text-sm bg-slate-800/60 text-gray-300 px-3 py-1 rounded-lg font-medium border border-white/5">{s}</span>
-                        ))}
-                        {(job.requiredSkills || []).length > 4 && (
-                          <span className="text-sm text-gray-500 px-2 py-1">+{job.requiredSkills.length - 4} more</span>
-                        )}
-                      </div>
-                    </Link>
-                  ))}
+                  {jobs.map((job) => <JobCard key={job._id} job={job} isSelected={id === job._id} />)}
                 </div>
               )}
             </div>

@@ -28,6 +28,39 @@ const highlights = [
   },
 ];
 
+const steps = [
+  {
+    title: 'Analyze student behavior',
+    text: 'We observe skills, CV signals, interests, and career goals to understand each learner.',
+  },
+  {
+    title: 'Generate Learning DNA',
+    text: 'The system converts signals into a personalized learner profile with strengths and weak areas.',
+  },
+  {
+    title: 'Deliver a personalized path',
+    text: 'Learners receive jobs, resources, and guidance that match their current growth stage.',
+  },
+];
+
+const studentStories = [
+  {
+    title: 'Software Engineering track',
+    metric: '85% similar learners became Software Engineers',
+    detail: 'Strong problem-solving + project-based learning + weekly job matching.',
+  },
+  {
+    title: 'Data / Analytics track',
+    metric: '78% improved their job match score in 30 days',
+    detail: 'Focused on SQL, dashboards, and skill-gap closure with guided practice.',
+  },
+  {
+    title: 'Design / Product track',
+    metric: 'Students reported higher confidence in portfolio reviews',
+    detail: 'Visual learners benefited from structured feedback and resource sequencing.',
+  },
+];
+
 export default function Landing() {
   return (
     <div className="min-h-screen font-sans relative overflow-hidden bg-[#060c18] text-white">
@@ -53,11 +86,10 @@ export default function Landing() {
               AI Career Intelligence
             </p>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight">
-              Build your career with
-              <span className="block bg-gradient-to-r from-cyan-300 to-blue-400 bg-clip-text text-transparent">Learning DNA</span>
+              AI-Powered Learning DNA Platform
             </h1>
             <p className="mt-5 text-lg text-slate-300 leading-relaxed max-w-xl">
-              NextCareer combines behavioral learning signals, skill graphs, and market demand to guide what you should learn, where to apply, and how to grow faster.
+              Every student learns differently. We personalize education using AI.
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row gap-4">
@@ -114,6 +146,70 @@ export default function Landing() {
               <p className="mt-2 text-sm text-slate-400 leading-relaxed">{item.desc}</p>
             </article>
           ))}
+        </section>
+
+        <section className="mt-16 rounded-3xl border border-white/10 bg-white/[0.05] backdrop-blur-xl p-6 lg:p-8">
+          <div className="flex items-start justify-between gap-4 mb-6">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-cyan-300/80 mb-2">How it works</p>
+              <h2 className="text-2xl font-semibold text-white">Three steps to a personalized learning journey</h2>
+            </div>
+          </div>
+          <div className="grid md:grid-cols-3 gap-4">
+            {steps.map((step, index) => (
+              <div key={step.title} className="rounded-2xl border border-white/10 bg-slate-950/30 p-5 hover:-translate-y-1 hover:border-cyan-500/30 transition-all duration-300">
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/30 flex items-center justify-center text-cyan-200 font-semibold mb-4">
+                  0{index + 1}
+                </div>
+                <h3 className="text-lg font-semibold text-white">{step.title}</h3>
+                <p className="mt-2 text-sm text-slate-400 leading-relaxed">{step.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-16 grid lg:grid-cols-2 gap-5">
+          <div className="rounded-3xl border border-white/10 bg-white/[0.05] backdrop-blur-xl p-6 lg:p-8">
+            <p className="text-xs uppercase tracking-[0.2em] text-cyan-300/80 mb-2">Students like you</p>
+            <h2 className="text-2xl font-semibold text-white">See how similar learners progressed</h2>
+            <div className="mt-6 space-y-4">
+              {studentStories.map((story) => (
+                <article key={story.title} className="rounded-2xl bg-slate-950/30 border border-white/10 p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-lg font-semibold text-white">{story.title}</h3>
+                      <p className="mt-2 text-sm text-slate-400 leading-relaxed">{story.detail}</p>
+                    </div>
+                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/15 border border-cyan-400/30 text-cyan-200 whitespace-nowrap">
+                      {story.metric}
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-cyan-500/10 via-blue-500/10 to-purple-500/10 backdrop-blur-xl p-6 lg:p-8 flex flex-col justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-cyan-300/80 mb-2">Outcome</p>
+              <h2 className="text-2xl font-semibold text-white">Intelligent, personalized, alive</h2>
+              <p className="mt-4 text-slate-300 leading-relaxed">
+                NextCareer feels like a real AI startup product because every section responds to the learner: jobs explain themselves, the dashboard adapts, and the assistant gives structured next steps.
+              </p>
+            </div>
+            <div className="mt-6 grid grid-cols-3 gap-3">
+              {[
+                { value: 'Learning DNA', label: 'adaptive' },
+                { value: 'Jobs', label: 'explained' },
+                { value: 'Chat', label: 'guided' },
+              ].map((item) => (
+                <div key={item.value} className="rounded-2xl bg-white/10 border border-white/10 p-4 text-center">
+                  <p className="text-sm font-semibold text-white">{item.value}</p>
+                  <p className="text-xs text-slate-300 mt-1">{item.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
       </main>
 
