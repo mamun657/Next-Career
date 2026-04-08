@@ -29,6 +29,10 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/careerbot', careerbotRoutes);
 app.use('/api/admin', adminRoutes);
 
+app.get('/', (req, res) => {
+  res.send('NextCareer API is running 🚀');
+});
+
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 app.use((err, req, res, next) => {
