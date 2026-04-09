@@ -11,6 +11,7 @@ const API_BASE = normalizeApiBase(import.meta.env.VITE_API_URL);
 
 const api = axios.create({
   baseURL: API_BASE,
+  timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -23,11 +24,20 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401) {
+    const status = err.response?.status;
+    const path = window.location.pathname;
+    const isAuthPage = path === '/login' || path === '/register';
+
+    if (status === 401 && !isAuthPage) {
       localStorage.removeItem('nextcareer_token');
       localStorage.removeItem('nextcareer_user');
       window.location.href = '/login';
     }
+
+    if (!err.response) {
+      err.message = 'Network error. Please check backend URL, CORS, and internet connection.';
+    }
+
     return Promise.reject(err);
   }
 );

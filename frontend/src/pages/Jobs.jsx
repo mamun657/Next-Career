@@ -1,10 +1,12 @@
-import { useEffect, useState, useRef } from 'react';
+import { lazy, Suspense, useEffect, useState, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AlertTriangle, CheckCircle2, ExternalLink, Sparkles, Target } from 'lucide-react';
 import Layout from '../components/Layout';
-import JobCard from '../components/JobCard';
+import { GridCardSkeleton } from '../components/Skeletons';
 import { getJobs, getJobMatchDetail } from '../services/api';
 import { getSkillIcon } from '../utils/imageHelpers';
+
+const JobCard = lazy(() => import('../components/JobCard'));
 
 export default function Jobs() {
   const { id } = useParams();
@@ -124,13 +126,7 @@ export default function Jobs() {
             {/* Job list */}
             <div>
               {loading ? (
-                <div className="flex items-center justify-center gap-3 py-16">
-                  <svg className="animate-spin h-6 w-6 text-cyan-400" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  <span className="text-gray-400 text-lg">Loading opportunities...</span>
-                </div>
+                <GridCardSkeleton count={5} />
               ) : jobs.length === 0 ? (
                 <div className="bg-white/[0.04] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-12 text-center">
                   <div className="w-16 h-16 mx-auto bg-slate-800/50 rounded-2xl flex items-center justify-center border border-white/10 mb-4">
@@ -142,9 +138,11 @@ export default function Jobs() {
                   <p className="text-gray-500 mt-2">Try adjusting your search criteria</p>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {jobs.map((job) => <JobCard key={job._id} job={job} isSelected={id === job._id} />)}
-                </div>
+                <Suspense fallback={<GridCardSkeleton count={5} />}>
+                  <div className="space-y-4">
+                    {jobs.map((job) => <JobCard key={job._id} job={job} isSelected={id === job._id} />)}
+                  </div>
+                </Suspense>
               )}
             </div>
 
@@ -237,6 +235,8 @@ export default function Jobs() {
                                     src={getSkillIcon(s)}
                                     alt={s}
                                     className="w-3.5 h-3.5 object-contain"
+                                    loading="lazy"
+                                    decoding="async"
                                     onError={(e) => {
                                       e.currentTarget.style.display = 'none';
                                     }}
@@ -251,6 +251,8 @@ export default function Jobs() {
                                 src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png"
                                 alt="No matching skills"
                                 className="w-14 h-14 mx-auto mb-2 opacity-70"
+                                loading="lazy"
+                                decoding="async"
                               />
                               <span className="text-gray-400 text-sm">No matched skills yet. Start with one high-impact skill.</span>
                             </div>

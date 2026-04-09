@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import ProfileAvatar from '../components/ProfileAvatar';
 import { updateProfile, extractSkills, extractSkillsFromPDF, mergeSkills } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { parseSkillInput, normalizeExtractedSkills, capitalizeSkill } from '../utils/skillUtils';
+import { parseSkillInput, normalizeExtractedSkills } from '../utils/skillUtils';
 
 const TRACKS = ['Web', 'Data', 'Design', 'Mobile', 'Backend', 'Full Stack'];
 const LEVELS = ['Fresher', 'Junior', 'Mid'];
@@ -222,7 +223,8 @@ export default function Profile() {
         <div className="max-w-4xl mx-auto relative z-10">
           {/* Page Header */}
           <div className="mb-10">
-            <div className="flex items-center gap-4 mb-2">
+            <div className="flex items-start justify-between gap-4 mb-2">
+              <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center border border-cyan-500/30">
                 <svg className="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -232,6 +234,16 @@ export default function Profile() {
                 <h1 className="text-3xl sm:text-4xl font-bold text-white">Profile Settings</h1>
                 <p className="text-gray-400 text-lg mt-1">Manage your information and skills for better career recommendations</p>
               </div>
+            </div>
+              <Link
+                to="/cv-assistant"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm font-medium shadow-lg shadow-cyan-500/25 transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Open CV Assistant
+              </Link>
             </div>
           </div>
 

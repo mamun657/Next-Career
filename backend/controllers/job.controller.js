@@ -2,12 +2,16 @@ const Job = require('../models/Job');
 const User = require('../models/User');
 const { computeMatchScore, getSkillGaps, recommendResourcesForGaps } = require('../utils/matching');
 
+function escapeRegex(input) {
+  return String(input || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 exports.getAllJobs = async (req, res) => {
   try {
     const { role, location, type, experienceLevel } = req.query;
     let filter = {};
-    if (role) filter.title = new RegExp(role, 'i');
-    if (location) filter.location = new RegExp(location, 'i');
+    if (role) filter.title = new RegExp(escapeRegex(role), 'i');
+    if (location) filter.location = new RegExp(escapeRegex(location), 'i');
     if (type) filter.jobType = type;
     if (experienceLevel) filter.experienceLevel = experienceLevel;
 
@@ -21,6 +25,10 @@ exports.getAllJobs = async (req, res) => {
 exports.getRecommendedJobs = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
     const jobs = await Job.find().sort({ createdAt: -1 });
     const userSkills = (user.skills || []).map((s) => s.name.toLowerCase());
 
@@ -45,7 +53,15 @@ exports.getRecommendedJobs = async (req, res) => {
 
 exports.getJobMatchDetail = async (req, res) => {
   try {
+    if (!req.params.id || !req.params.id.match(/^[a-f\d]{24}$/i)) {
+      return res.status(400).json({ message: 'Invalid job ID.' });
+    }
+
     const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
     const job = await Job.findById(req.params.id);
     if (!job) return res.status(404).json({ message: 'Job not found.' });
 

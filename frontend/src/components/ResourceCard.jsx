@@ -55,8 +55,11 @@ export default function ResourceCard({ resource }) {
           {platformInfo.logo && !imgError ? (
             <img
               src={platformInfo.logo}
-              alt={resource.platform}
+              alt=""
+              aria-hidden="true"
               className="w-8 h-8 object-contain"
+              loading="lazy"
+              decoding="async"
               onError={() => setImgError(true)}
             />
           ) : (

@@ -3,23 +3,45 @@ import { getProfile } from '../services/api';
 
 const AuthContext = createContext(null);
 
+function getStoredUser() {
+  try {
+    const raw = localStorage.getItem('nextcareer_user');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => getStoredUser());
+  const [loading, setLoading] = useState(() => Boolean(localStorage.getItem('nextcareer_token')));
 
   useEffect(() => {
     const token = localStorage.getItem('nextcareer_token');
     if (!token) {
-      setLoading(false);
       return;
     }
+
+    let mounted = true;
+
     getProfile()
-      .then((res) => setUser(res.data))
+      .then((res) => {
+        if (!mounted) return;
+        setUser(res.data);
+        localStorage.setItem('nextcareer_user', JSON.stringify(res.data));
+      })
       .catch(() => {
         localStorage.removeItem('nextcareer_token');
         localStorage.removeItem('nextcareer_user');
+        if (mounted) setUser(null);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const login = (userData, token) => {
@@ -34,7 +56,10 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  const refreshUser = (userData) => setUser(userData);
+  const refreshUser = (userData) => {
+    setUser(userData);
+    localStorage.setItem('nextcareer_user', JSON.stringify(userData));
+  };
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout, refreshUser }}>

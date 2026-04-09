@@ -90,7 +90,7 @@ export default function CareerBot() {
       <div className="bg-gradient-to-r from-slate-800/80 via-cyan-900/30 to-slate-800/80 px-6 py-5 border-b border-white/10">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-            <img src={chatbotIconUrl} alt="CareerBot" className="w-5 h-5 object-contain" />
+            <img src={chatbotIconUrl} alt="" aria-hidden="true" className="w-5 h-5 object-contain" />
           </div>
           <div>
             <h3 className="font-semibold text-white text-lg">CareerBot</h3>

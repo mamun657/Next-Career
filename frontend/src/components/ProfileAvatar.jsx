@@ -97,6 +97,8 @@ export default function ProfileAvatar({
               src={src}
               alt={name || 'Profile'}
               className="w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white text-2xl font-semibold">

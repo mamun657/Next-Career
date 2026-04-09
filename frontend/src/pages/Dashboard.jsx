@@ -1,14 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/Layout';
-import RoadmapCard from '../components/RoadmapCard';
-import JobCard from '../components/JobCard';
-import Chatbot from '../components/Chatbot';
-import SkillBubble from '../components/charts/SkillBubble';
-import LearningDNAChart from '../components/charts/LearningDNAChart';
-import ProgressChart from '../components/charts/ProgressChart';
-import MatchCircle from '../components/charts/MatchCircle';
-import AnimatedStat from '../components/charts/AnimatedStat';
+import { CardSkeleton, ChartSkeleton, GridCardSkeleton } from '../components/Skeletons';
 import {
   getRecommendedJobs,
   getResources,
@@ -17,12 +10,22 @@ import {
 } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
+const RoadmapCard = lazy(() => import('../components/RoadmapCard'));
+const JobCard = lazy(() => import('../components/JobCard'));
+const Chatbot = lazy(() => import('../components/Chatbot'));
+const SkillBubble = lazy(() => import('../components/charts/SkillBubble'));
+const LearningDNAChart = lazy(() => import('../components/charts/LearningDNAChart'));
+const ProgressChart = lazy(() => import('../components/charts/ProgressChart'));
+const MatchCircle = lazy(() => import('../components/charts/MatchCircle'));
+const AnimatedStat = lazy(() => import('../components/charts/AnimatedStat'));
+
 export default function Dashboard() {
   const { user } = useAuth();
   const [jobs, setJobs] = useState([]);
   const [resources, setResources] = useState([]);
   const [roadmaps, setRoadmaps] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [showRoadmapModal, setShowRoadmapModal] = useState(false);
   const [targetRole, setTargetRole] = useState('');
   const [duration, setDuration] = useState(3);
@@ -33,18 +36,31 @@ export default function Dashboard() {
   const isSuperAdmin = user?.role === 'super_admin';
 
   useEffect(() => {
+    let mounted = true;
+
     Promise.all([
       getRecommendedJobs(),
       getResources(),
       getUserRoadmaps(),
     ])
       .then(([jr, rr, rm]) => {
+        if (!mounted) return;
         setJobs(jr.data || []);
         setResources(rr.data?.slice(0, 6) || []);
         setRoadmaps(rm.data || []);
+        setLoadError('');
       })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+      .catch((err) => {
+        if (!mounted) return;
+        setLoadError(err?.response?.data?.message || 'Could not load complete dashboard data. Showing available data.');
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const handleCreateRoadmap = async (e) => {
@@ -65,21 +81,48 @@ export default function Dashboard() {
 
   const userSkills = (user?.skills || []).map((s) => s.name);
   const allMissing = [...new Set(jobs.flatMap((j) => j.missingSkills || []))].slice(0, 6);
-  const todayInsight = allMissing.length
+  const todayInsight = userSkills.length === 0
+    ? 'Add your first skills to unlock personalized job matching and Learning DNA insights.'
+    : allMissing.length
     ? `Focus on ${allMissing[0]} today. Learners who close one targeted gap per week improve job-match quality significantly.`
     : 'Your core profile is strong. Improve interview narratives and ship one portfolio project this week.';
 
-  const progressTrend = useMemo(() => {
-    const base = userSkills.length > 0 ? 30 : 20;
-    return [
-      { week: 'Week 1', score: base },
-      { week: 'Week 2', score: Math.min(100, base + 12) },
-      { week: 'Week 3', score: Math.min(100, base + 24) },
-      { week: 'Week 4', score: Math.min(100, base + 35) },
-      { week: 'Week 5', score: Math.min(100, base + 47) },
-      { week: 'Week 6', score: Math.min(100, base + 58) },
+  const profileCompletion = useMemo(() => {
+    const checkpoints = [
+      Boolean(user?.name),
+      Boolean(user?.education),
+      Boolean(user?.experienceLevel),
+      Boolean(user?.preferredTrack),
+      userSkills.length > 0,
+      (user?.interests || []).length > 0,
     ];
-  }, [userSkills.length]);
+
+    const completed = checkpoints.filter(Boolean).length;
+    return Math.round((completed / checkpoints.length) * 100);
+  }, [user, userSkills.length]);
+
+  const jobMatchScores = jobs
+    .map((job) => Number(job?.matchScore))
+    .filter((value) => Number.isFinite(value));
+  const averageMatchScore = jobMatchScores.length
+    ? Math.round(jobMatchScores.reduce((sum, value) => sum + value, 0) / jobMatchScores.length)
+    : 0;
+
+  const progressTrend = useMemo(() => {
+    if (userSkills.length === 0) return [];
+
+    const weightedStart = Math.max(18, Math.round((profileCompletion * 0.45) + (averageMatchScore * 0.35)));
+    const gain = allMissing.length > 0 ? 28 : 18;
+
+    return [
+      { week: 'Week 1', score: Math.min(100, weightedStart) },
+      { week: 'Week 2', score: Math.min(100, weightedStart + Math.round(gain * 0.22)) },
+      { week: 'Week 3', score: Math.min(100, weightedStart + Math.round(gain * 0.4)) },
+      { week: 'Week 4', score: Math.min(100, weightedStart + Math.round(gain * 0.62)) },
+      { week: 'Week 5', score: Math.min(100, weightedStart + Math.round(gain * 0.82)) },
+      { week: 'Week 6', score: Math.min(100, weightedStart + gain) },
+    ];
+  }, [userSkills.length, profileCompletion, averageMatchScore, allMissing.length]);
 
   const studentsLikeYouBars = [
     { role: 'Software Engineer', value: 85 },
@@ -87,12 +130,12 @@ export default function Dashboard() {
     { role: 'UI/UX Designer', value: 50 },
   ];
 
-  const jobMatchScores = jobs
-    .map((job) => Number(job?.matchScore))
-    .filter((value) => Number.isFinite(value));
-  const averageMatchScore = jobMatchScores.length
-    ? Math.round(jobMatchScores.reduce((sum, value) => sum + value, 0) / jobMatchScores.length)
-    : 40;
+  const improvementPotential = useMemo(() => {
+    if (userSkills.length === 0) return 0;
+    if (!allMissing.length) return 11;
+    const estimate = Math.min(35, 8 + (allMissing.length * 3));
+    return estimate;
+  }, [userSkills.length, allMissing.length]);
 
   const getSkillTagClass = (skill) => {
     const key = String(skill || '').toLowerCase();
@@ -116,14 +159,23 @@ export default function Dashboard() {
         </div>
 
         <div className="max-w-6xl mx-auto relative z-10">
+          {loadError ? (
+            <div className="mb-6 rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+              {loadError}
+            </div>
+          ) : null}
+
           {/* Welcome Header Card */}
           <div className="mb-10 bg-gradient-to-r from-white/5 via-purple-500/[0.06] to-cyan-500/[0.06] backdrop-blur-xl rounded-2xl border border-white/10 p-8 shadow-[0_0_40px_rgba(0,0,0,0.4)]">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 overflow-hidden p-1">
                 <img
                   src="/icons/welcome-badge.png"
-                  alt="Welcome"
+                  alt=""
+                  aria-hidden="true"
                   className="w-full h-full object-cover scale-125"
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
               <div className="flex-1">
@@ -210,8 +262,12 @@ export default function Dashboard() {
 
           {/* Visual analytics */}
           <div className="grid gap-6 lg:grid-cols-2 mb-6">
-            <LearningDNAChart user={user} />
-            <SkillBubble skills={user?.skills} />
+            <Suspense fallback={<ChartSkeleton />}>
+              <LearningDNAChart user={user} />
+            </Suspense>
+            <Suspense fallback={<ChartSkeleton />}>
+              <SkillBubble skills={user?.skills} />
+            </Suspense>
           </div>
 
           <div className="mb-8 rounded-2xl border border-white/10 bg-slate-900/35 p-4 backdrop-blur-xl">
@@ -220,11 +276,15 @@ export default function Dashboard() {
               <p className="text-sm text-cyan-200 font-medium">Today&apos;s Insight</p>
             </div>
             <p className="text-sm text-gray-300 leading-relaxed">{todayInsight}</p>
-            <p className="text-xs text-gray-500 mt-2">Improvement potential: {allMissing.length ? '24%' : '11%'} this week by focusing on one narrow gap.</p>
+            <p className="text-xs text-gray-500 mt-2">
+              Improvement potential: {improvementPotential}% this week by focusing on one narrow gap.
+            </p>
           </div>
 
           <div className="mb-8">
-            <ProgressChart data={progressTrend} />
+            <Suspense fallback={<ChartSkeleton />}>
+              <ProgressChart data={progressTrend} />
+            </Suspense>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3 mb-8">
@@ -238,25 +298,31 @@ export default function Dashboard() {
               </div>
 
               <div className="grid md:grid-cols-3 gap-4">
-                <AnimatedStat
-                  value={85}
-                  suffix="%"
-                  label="similar learners became Software Engineers"
-                  accent="text-cyan-300"
-                />
-                <AnimatedStat
-                  value={78}
-                  suffix="%"
-                  label="improved job match score in 30 days"
-                  accent="text-purple-300"
-                />
-                <AnimatedStat
-                  value={4.8}
-                  suffix="/5"
-                  decimals={1}
-                  label="average confidence in portfolio reviews"
-                  accent="text-emerald-300"
-                />
+                <Suspense fallback={<CardSkeleton />}>
+                  <AnimatedStat
+                    value={85}
+                    suffix="%"
+                    label="similar learners became Software Engineers"
+                    accent="text-cyan-300"
+                  />
+                </Suspense>
+                <Suspense fallback={<CardSkeleton />}>
+                  <AnimatedStat
+                    value={78}
+                    suffix="%"
+                    label="improved job match score in 30 days"
+                    accent="text-purple-300"
+                  />
+                </Suspense>
+                <Suspense fallback={<CardSkeleton />}>
+                  <AnimatedStat
+                    value={4.8}
+                    suffix="/5"
+                    decimals={1}
+                    label="average confidence in portfolio reviews"
+                    accent="text-emerald-300"
+                  />
+                </Suspense>
               </div>
 
               <div className="mt-6 space-y-3 rounded-2xl border border-white/10 bg-slate-900/35 p-4">
@@ -281,7 +347,9 @@ export default function Dashboard() {
               <p className="text-xs uppercase tracking-[0.2em] text-cyan-300/80 mb-2">Career match</p>
               <p className="text-lg font-semibold text-white">Your profile is trending toward high-fit roles</p>
               <div className="my-5 flex justify-center">
-                <MatchCircle score={averageMatchScore} />
+                <Suspense fallback={<div className="w-[124px] h-[124px] rounded-full border border-white/10 bg-white/5 animate-pulse" />}>
+                  <MatchCircle score={averageMatchScore} />
+                </Suspense>
               </div>
               <p className="text-sm text-slate-300 leading-relaxed">The more complete your Learning DNA becomes, the sharper your recommendations become across jobs, resources, and chatbot guidance.</p>
             </div>
@@ -424,7 +492,9 @@ export default function Dashboard() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {roadmaps.length ? (
-                roadmaps.slice(0, 3).map((r) => <RoadmapCard key={r._id} roadmap={r} />)
+                <Suspense fallback={<GridCardSkeleton count={3} />}>
+                  {roadmaps.slice(0, 3).map((r) => <RoadmapCard key={r._id} roadmap={r} />)}
+                </Suspense>
               ) : (
                 <div className="sm:col-span-2 lg:col-span-3 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-8 text-center shadow-[0_0_40px_rgba(0,0,0,0.4)]">
                   <div className="w-16 h-16 mx-auto bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-2xl flex items-center justify-center border border-white/10 mb-4">
@@ -471,9 +541,11 @@ export default function Dashboard() {
                 <span className="text-gray-400">Loading recommendations...</span>
               </div>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {jobs.slice(0, 6).map((job) => <JobCard key={job._id} job={job} />)}
-              </div>
+              <Suspense fallback={<GridCardSkeleton count={6} />}>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {jobs.slice(0, 6).map((job) => <JobCard key={job._id} job={job} />)}
+                </div>
+              </Suspense>
             )}
           </div>
 
@@ -495,7 +567,9 @@ export default function Dashboard() {
                 Open full chat
               </Link>
             </div>
-            <Chatbot compact />
+            <Suspense fallback={<ChartSkeleton />}>
+              <Chatbot compact />
+            </Suspense>
           </div>
 
           {/* Roadmap Modal */}

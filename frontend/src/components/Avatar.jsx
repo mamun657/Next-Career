@@ -47,6 +47,8 @@ export default function Avatar({
           src={src}
           alt={name || 'User avatar'}
           className="w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
         />
       ) : (
         <div className="w-full h-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-semibold">

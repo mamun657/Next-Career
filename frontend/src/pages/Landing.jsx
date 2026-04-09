@@ -1,8 +1,11 @@
+import { lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
-import Lottie from 'lottie-react';
+import { motion } from 'framer-motion';
+import { ArrowRight, Gauge, Clock3, Rocket } from 'lucide-react';
 import Brand from '../components/Brand';
 import Footer from '../components/Footer';
-import webDevAnimation from '../assets/animated/web-development.json';
+
+const HeroAnimation = lazy(() => import('../components/HeroAnimation'));
 
 const highlights = [
   {
@@ -61,77 +64,117 @@ const studentStories = [
   },
 ];
 
+const heroStats = [
+  { value: '92%', label: 'Relevance score', icon: Gauge },
+  { value: '7d', label: 'Insight cycle', icon: Clock3 },
+  { value: '3x', label: 'Faster planning', icon: Rocket },
+];
+
+const heroTextContainer = {
+  hidden: { opacity: 0, y: 24 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.65,
+      ease: [0.16, 1, 0.3, 1],
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const heroTextItem = {
+  hidden: { opacity: 0, y: 18 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] },
+  },
+};
+
 export default function Landing() {
   return (
     <div className="min-h-screen font-sans relative overflow-hidden bg-[#060c18] text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(58,190,249,0.20),transparent_40%),radial-gradient(circle_at_80%_65%,rgba(99,102,241,0.14),transparent_35%)]" />
       <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px)', backgroundSize: '42px 42px' }} />
+      <div className="absolute -top-28 left-12 w-80 h-80 rounded-full bg-cyan-400/15 blur-[130px]" />
+      <div className="absolute top-24 right-20 w-72 h-72 rounded-full bg-blue-500/12 blur-[120px]" />
+      <div className="absolute -bottom-16 right-1/3 w-64 h-64 rounded-full bg-indigo-500/10 blur-[110px]" />
 
       <nav className="relative z-20 px-6 lg:px-12 py-6 flex items-center justify-between">
         <Brand />
-        <div className="hidden sm:flex items-center gap-3">
-          <Link to="/login" className="px-4 py-2 text-sm text-slate-300 hover:text-white transition-colors">
-            Sign in
-          </Link>
-          <Link to="/register" className="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/20 text-sm font-medium transition-all">
-            Create account
-          </Link>
-        </div>
       </nav>
 
       <main className="relative z-10 px-6 lg:px-12 xl:px-24 pb-16 pt-8 lg:pt-10">
         <section className="grid lg:grid-cols-2 gap-10 items-center">
-          <div>
-            <p className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-cyan-500/10 border border-cyan-400/30 text-cyan-200 mb-5">
+          <motion.div variants={heroTextContainer} initial="hidden" animate="visible">
+            <motion.p variants={heroTextItem} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-cyan-500/10 border border-cyan-400/30 text-cyan-200 mb-5">
               AI Career Intelligence
-            </p>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight">
-              AI-Powered Learning DNA Platform
-            </h1>
-            <p className="mt-5 text-lg text-slate-300 leading-relaxed max-w-xl">
+            </motion.p>
+            <motion.h1 variants={heroTextItem} className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-[-0.02em] text-slate-50">
+              AI-Powered{' '}
+              <span className="bg-gradient-to-r from-cyan-300 via-sky-300 to-blue-400 bg-clip-text text-transparent">
+                Learning DNA
+              </span>{' '}
+              Platform
+            </motion.h1>
+            <motion.p variants={heroTextItem} className="mt-5 text-lg text-slate-200/95 leading-relaxed max-w-xl">
               Every student learns differently. We personalize education using AI.
-            </p>
+            </motion.p>
 
-            <div className="mt-8 flex flex-col sm:flex-row gap-4">
-              <Link
-                to="/register"
-                className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 shadow-[0_20px_60px_rgba(58,190,249,0.35)] transition-all duration-300 hover:-translate-y-0.5"
-              >
-                Try Demo
-                <svg className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </Link>
+            <motion.div variants={heroTextItem} className="mt-8 flex flex-wrap items-center gap-4">
               <Link
                 to="/login"
-                className="inline-flex items-center justify-center px-8 py-4 rounded-2xl font-semibold bg-white/5 hover:bg-white/10 border border-white/20 text-slate-100 transition-all"
+                className="inline-flex items-center justify-center px-8 py-3.5 rounded-full font-semibold bg-white/[0.04] hover:bg-white/[0.08] border border-white/20 hover:border-cyan-300/35 text-slate-100 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-105"
               >
-                Open Platform
+                Sign In
               </Link>
-            </div>
+              <Link
+                to="/register"
+                className="group inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-semibold bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-600 hover:from-cyan-300 hover:via-sky-400 hover:to-blue-500 text-white shadow-[0_18px_55px_rgba(56,189,248,0.4)] hover:shadow-[0_24px_70px_rgba(56,189,248,0.52)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-105"
+              >
+                Create Account
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform duration-300 ease-out" />
+              </Link>
+            </motion.div>
 
-            <div className="mt-8 grid grid-cols-3 gap-4 max-w-md">
-              <div className="rounded-xl bg-white/[0.06] border border-white/10 p-3 backdrop-blur-xl">
-                <p className="text-2xl font-bold text-cyan-300">92%</p>
-                <p className="text-xs text-slate-400">Relevance score</p>
-              </div>
-              <div className="rounded-xl bg-white/[0.06] border border-white/10 p-3 backdrop-blur-xl">
-                <p className="text-2xl font-bold text-cyan-300">7d</p>
-                <p className="text-xs text-slate-400">Insight cycle</p>
-              </div>
-              <div className="rounded-xl bg-white/[0.06] border border-white/10 p-3 backdrop-blur-xl">
-                <p className="text-2xl font-bold text-cyan-300">3x</p>
-                <p className="text-xs text-slate-400">Faster planning</p>
-              </div>
-            </div>
-          </div>
+            <motion.div variants={heroTextItem} className="mt-8 grid grid-cols-3 gap-4 max-w-md">
+              {heroStats.map((item) => {
+                const Icon = item.icon;
 
-          <div className="relative">
-            <div className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 blur-2xl" />
-            <div className="relative rounded-3xl border border-white/15 bg-white/[0.05] backdrop-blur-2xl p-6">
-              <Lottie animationData={webDevAnimation} loop className="w-full max-w-[460px] mx-auto" />
-            </div>
-          </div>
+                return (
+                  <div
+                    key={item.label}
+                    className="group rounded-xl bg-white/[0.06] border border-cyan-300/15 hover:border-cyan-300/35 p-3.5 backdrop-blur-xl transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(34,211,238,0.12)]"
+                  >
+                    <div className="w-8 h-8 rounded-lg mb-3 bg-cyan-500/10 border border-cyan-400/25 flex items-center justify-center text-cyan-200 group-hover:text-cyan-100 transition-colors duration-300">
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <p className="text-2xl font-bold text-cyan-200 leading-none">{item.value}</p>
+                    <p className="mt-1.5 text-xs text-slate-300/80">{item.label}</p>
+                  </div>
+                );
+              })}
+            </motion.div>
+          </motion.div>
+
+          <motion.div
+            className="relative"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1], delay: 0.12 }}
+          >
+            <div className="absolute -inset-6 rounded-[2rem] bg-gradient-to-r from-cyan-400/18 via-blue-500/14 to-indigo-500/16 blur-3xl" />
+            <motion.div
+              className="relative rounded-3xl border border-white/15 bg-white/[0.05] backdrop-blur-2xl p-6 shadow-[0_30px_80px_rgba(8,47,73,0.45)]"
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 6.5, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <Suspense fallback={<div className="w-full h-[320px] rounded-2xl bg-white/5 border border-white/10 animate-pulse" />}>
+                <HeroAnimation />
+              </Suspense>
+            </motion.div>
+          </motion.div>
         </section>
 
         <section className="mt-16 grid md:grid-cols-3 gap-5">
@@ -168,7 +211,7 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="mt-16 grid lg:grid-cols-2 gap-5">
+        <section className="mt-16">
           <div className="rounded-3xl border border-white/10 bg-white/[0.05] backdrop-blur-xl p-6 lg:p-8">
             <p className="text-xs uppercase tracking-[0.2em] text-cyan-300/80 mb-2">Students like you</p>
             <h2 className="text-2xl font-semibold text-white">See how similar learners progressed</h2>
@@ -185,28 +228,6 @@ export default function Landing() {
                     </span>
                   </div>
                 </article>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-cyan-500/10 via-blue-500/10 to-purple-500/10 backdrop-blur-xl p-6 lg:p-8 flex flex-col justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-cyan-300/80 mb-2">Outcome</p>
-              <h2 className="text-2xl font-semibold text-white">Intelligent, personalized, alive</h2>
-              <p className="mt-4 text-slate-300 leading-relaxed">
-                NextCareer feels like a real AI startup product because every section responds to the learner: jobs explain themselves, the dashboard adapts, and the assistant gives structured next steps.
-              </p>
-            </div>
-            <div className="mt-6 grid grid-cols-3 gap-3">
-              {[
-                { value: 'Learning DNA', label: 'adaptive' },
-                { value: 'Jobs', label: 'explained' },
-                { value: 'Chat', label: 'guided' },
-              ].map((item) => (
-                <div key={item.value} className="rounded-2xl bg-white/10 border border-white/10 p-4 text-center">
-                  <p className="text-sm font-semibold text-white">{item.value}</p>
-                  <p className="text-xs text-slate-300 mt-1">{item.label}</p>
-                </div>
               ))}
             </div>
           </div>

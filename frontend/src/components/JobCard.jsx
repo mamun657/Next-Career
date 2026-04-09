@@ -48,8 +48,11 @@ export default function JobCard({ job, isSelected = false }) {
             {!logoError ? (
               <img
                 src={logoUrl}
-                alt={job.company}
+                alt=""
+                aria-hidden="true"
                 className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
                 onError={() => setLogoError(true)}
               />
             ) : (
@@ -88,8 +91,11 @@ export default function JobCard({ job, isSelected = false }) {
             {getSkillIcon(s) ? (
               <img
                 src={getSkillIcon(s)}
-                alt={s}
+                alt=""
+                aria-hidden="true"
                 className="w-3.5 h-3.5 object-contain"
+                loading="lazy"
+                decoding="async"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
                 }}

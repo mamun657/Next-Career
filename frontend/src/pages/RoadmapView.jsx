@@ -10,6 +10,9 @@ export default function RoadmapView() {
   const [downloading, setDownloading] = useState(false);
   const printRef = useRef(null);
 
+  const totalWeeks = roadmap?.steps?.length ? Math.max(...roadmap.steps.map((step) => Number(step.week) || 0)) : 0;
+  const totalTasks = roadmap?.steps?.reduce((acc, step) => acc + (step.tasks?.length || 0), 0) || 0;
+
   useEffect(() => {
     if (!id) return;
     getRoadmapById(id)
@@ -63,15 +66,15 @@ export default function RoadmapView() {
           </div>
           <div class="stats">
             <div class="stat">
-              <div class="stat-value">${roadmap.steps?.length || 0}</div>
-              <div class="stat-label">Weeks</div>
+              <div class="stat-value">${totalWeeks}</div>
+              <div class="stat-label">Total Weeks</div>
             </div>
             <div class="stat">
               <div class="stat-value">${roadmap.duration}</div>
               <div class="stat-label">Months</div>
             </div>
             <div class="stat">
-              <div class="stat-value">${roadmap.steps?.reduce((acc, s) => acc + (s.tasks?.length || 0), 0) || 0}</div>
+              <div class="stat-value">${totalTasks}</div>
               <div class="stat-label">Tasks</div>
             </div>
           </div>
@@ -229,7 +232,7 @@ export default function RoadmapView() {
           {/* Progress Stats */}
           <div className="grid grid-cols-3 gap-4 mb-8">
             <div className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-5 text-center hover:border-cyan-500/30 transition-all">
-              <p className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">{roadmap.steps?.length || 0}</p>
+              <p className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">{totalWeeks}</p>
               <p className="text-sm text-gray-400 mt-1">Total Weeks</p>
             </div>
             <div className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-5 text-center hover:border-purple-500/30 transition-all">
@@ -237,7 +240,7 @@ export default function RoadmapView() {
               <p className="text-sm text-gray-400 mt-1">Months</p>
             </div>
             <div className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-5 text-center hover:border-emerald-500/30 transition-all">
-              <p className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">{roadmap.steps?.reduce((acc, s) => acc + (s.tasks?.length || 0), 0) || 0}</p>
+              <p className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">{totalTasks}</p>
               <p className="text-sm text-gray-400 mt-1">Tasks</p>
             </div>
           </div>

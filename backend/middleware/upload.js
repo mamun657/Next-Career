@@ -55,7 +55,12 @@ const uploadPdf = multer({
 const handleMulterError = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
-      return res.status(413).json({ message: 'File too large. Maximum size is 10MB.' });
+      const isPdfRoute = req.originalUrl.includes('/extract-skills-pdf');
+      return res.status(413).json({
+        message: isPdfRoute
+          ? 'File too large. Maximum size is 5MB for PDF files.'
+          : 'File too large. Maximum size is 10MB.',
+      });
     }
     return res.status(400).json({ message: err.message });
   } else if (err) {

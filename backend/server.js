@@ -5,6 +5,7 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const config = require('./config/env');
+const { createSimpleRateLimiter } = require('./middleware/rateLimit');
 
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
@@ -17,6 +18,19 @@ const adminRoutes = require('./routes/admin.routes');
 connectDB();
 
 const app = express();
+app.set('trust proxy', 1);
+
+const authLimiter = createSimpleRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  message: 'Too many authentication attempts. Please try again later.',
+});
+
+const chatLimiter = createSimpleRateLimiter({
+  windowMs: 60 * 1000,
+  max: 40,
+  message: 'Too many chat requests. Please slow down and try again.',
+});
 const defaultOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
@@ -45,12 +59,12 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/ai', aiRoutes);
-app.use('/api/careerbot', careerbotRoutes);
+app.use('/api/careerbot', chatLimiter, careerbotRoutes);
 app.use('/api/admin', adminRoutes);
 
 app.get('/', (req, res) => {
@@ -61,7 +75,10 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ message: err.message || 'Server error.' });
+  const isProduction = config.nodeEnv === 'production';
+  res.status(500).json({
+    message: isProduction ? 'Internal server error.' : (err.message || 'Server error.'),
+  });
 });
 
 const PORT = config.port || 5000;

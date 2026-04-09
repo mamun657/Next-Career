@@ -4,10 +4,10 @@ const ChatMessage = require('../models/ChatMessage');
 const User = require('../models/User');
 const config = require('../config/env');
 
-// Initialize Groq client
-const groq = new Groq({
-  apiKey: config.groqApiKey,
-});
+let groq = null;
+if (config.groqApiKey) {
+  groq = new Groq({ apiKey: config.groqApiKey });
+}
 
 /**
  * Generate system prompt with user context
@@ -132,6 +132,12 @@ exports.getHistory = async (req, res) => {
  */
 exports.chat = async (req, res) => {
   try {
+    if (!groq) {
+      return res.status(503).json({
+        message: 'CareerBot is not configured yet. Missing GROQ_API_KEY on server.',
+      });
+    }
+
     const { message, sessionId } = req.body;
     const userId = req.user._id;
     

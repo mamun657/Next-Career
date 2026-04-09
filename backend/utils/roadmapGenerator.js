@@ -1,5 +1,4 @@
 
-
 const ROLE_TEMPLATES = {
   'Frontend Developer': {
     topics: ['HTML & CSS', 'JavaScript', 'React', 'State Management', 'Build Tools', 'Testing'],
@@ -25,21 +24,75 @@ const ROLE_TEMPLATES = {
     topics: ['HTML & CSS', 'JavaScript', 'Responsive design', 'APIs', 'Hosting', 'Performance'],
     projects: ['Personal site', 'Landing page', 'Blog', 'Small business site', 'Portfolio', 'Interactive app'],
   },
+  'Mobile Developer': {
+    topics: ['Dart & OOP basics', 'Flutter widgets', 'State management', 'Navigation & routing', 'Firebase integration', 'Testing & release'],
+    projects: ['Calculator app', 'Notes app', 'E-commerce mobile UI', 'Realtime chat app', 'Habit tracker', 'Production-ready portfolio app'],
+  },
+  'Flutter Developer': {
+    topics: ['Dart fundamentals', 'Flutter UI & layouts', 'State management (Provider/Bloc)', 'API integration & networking', 'Firebase auth + storage', 'Testing, optimization & Play Store prep'],
+    projects: ['To-do app', 'Weather app', 'Social feed UI', 'Job tracker app', 'Learning app with Firebase', 'Portfolio app with CI/CD'],
+  },
+  'React Native Developer': {
+    topics: ['JavaScript/TypeScript', 'React Native fundamentals', 'Navigation patterns', 'State management', 'Native modules & device APIs', 'Performance & release process'],
+    projects: ['Task app', 'Fitness tracker', 'E-commerce mobile app', 'Chat app', 'Location-based finder', 'Portfolio app'],
+  },
   default: {
     topics: ['Core skills', 'Tools', 'Practice', 'Projects', 'Portfolio', 'Applications'],
     projects: ['Starter project', 'Portfolio', 'Real project', 'Open source', 'Freelance', 'Apply'],
   },
 };
 
-function getTemplate(role) {
-  const key = Object.keys(ROLE_TEMPLATES).find(
-    (k) => k.toLowerCase().includes((role || '').toLowerCase())
-  );
+function normalizeText(input) {
+  return String(input || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function inferRoleKey(role, currentSkills = []) {
+  const normalizedRole = normalizeText(role);
+  const skillsText = normalizeText(currentSkills.join(' '));
+  const combined = `${normalizedRole} ${skillsText}`.trim();
+
+  if (/flutter/.test(combined)) return 'Flutter Developer';
+  if (/react native|expo/.test(combined)) return 'React Native Developer';
+  if (/mobile|android|ios/.test(combined)) return 'Mobile Developer';
+  if (/frontend|front end/.test(combined)) return 'Frontend Developer';
+  if (/backend|back end/.test(combined)) return 'Backend Developer';
+  if (/full stack|fullstack/.test(combined)) return 'Full Stack Developer';
+  if (/data analyst|analytics|bi\b/.test(combined)) return 'Data Analyst';
+  if (/ui\s*ux|product designer|ux/.test(combined)) return 'UI/UX Designer';
+  if (/web developer|web development|web/.test(combined)) return 'Web Developer';
+
+  return null;
+}
+
+function getTemplate(role, currentSkills = []) {
+  const inferredKey = inferRoleKey(role, currentSkills);
+  if (inferredKey && ROLE_TEMPLATES[inferredKey]) {
+    return ROLE_TEMPLATES[inferredKey];
+  }
+
+  const normalizedRole = normalizeText(role);
+  const key = Object.keys(ROLE_TEMPLATES).find((k) => {
+    const normalizedKey = normalizeText(k);
+    return normalizedRole.includes(normalizedKey) || normalizedKey.includes(normalizedRole);
+  });
+
   return ROLE_TEMPLATES[key] || ROLE_TEMPLATES.default;
 }
 
+function projectKickoffText(project) {
+  const normalized = normalizeText(project);
+  if (normalized.includes('project') || normalized.includes('app')) {
+    return `Build ${project}`;
+  }
+  return `Build ${project} project`;
+}
+
 function generateRoadmapSteps(targetRole, duration, currentSkills = []) {
-  const template = getTemplate(targetRole);
+  const template = getTemplate(targetRole, currentSkills);
   const { topics, projects } = template;
   const steps = [];
   const weeksPerStep = duration === 3 ? 2 : 4;
@@ -53,12 +106,12 @@ function generateRoadmapSteps(targetRole, duration, currentSkills = []) {
       week,
       topic,
       tasks: [
-        `Study ${topic} fundamentals`,
-        `Build small exercises`,
-        `Start ${project} project`,
+        `Master ${topic} fundamentals`,
+        `Complete 2 focused practice exercises`,
+        projectKickoffText(project),
         `Document progress`,
       ],
-      projectIdeas: [project, `Mini project using ${topic}`],
+      projectIdeas: [project, `${topic} mini milestone`],
       jobApplicationTip:
         i >= 3
           ? `Consider applying to ${duration === 3 ? 'internships' : 'junior roles'} while continuing to build.`

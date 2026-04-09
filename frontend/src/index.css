@@ -11,6 +11,31 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #111827 !important;
+  }
+
+  nav,
+  footer,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .resume-page {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 0.35in 0.45in !important;
+  }
+
+  .cv-print-section {
+    break-inside: avoid;
+  }
+}
+
 /* Premium dark auth form styles */
 @layer components {
   .auth-input {

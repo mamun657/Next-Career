@@ -62,21 +62,27 @@ exports.mergeSkills = async (req, res) => {
  */
 exports.generateRoadmap = async (req, res) => {
   try {
-    const { targetRole, duration } = req.body;
-    if (!targetRole || !duration || ![3, 6].includes(Number(duration))) {
+    const durationMonths = Number(req.body?.duration);
+    const targetRole = String(req.body?.targetRole || '').trim();
+
+    if (!targetRole || !durationMonths || ![3, 6].includes(durationMonths)) {
       return res.status(400).json({
         message: 'targetRole and duration (3 or 6 months) are required.',
       });
     }
 
     const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
     const currentSkills = (user.skills || []).map((s) => s.name);
-    const steps = generateRoadmapSteps(targetRole, Number(duration), currentSkills);
+    const steps = generateRoadmapSteps(targetRole, durationMonths, currentSkills);
 
     const roadmap = await Roadmap.create({
       userId: req.user._id,
       targetRole,
-      duration: Number(duration),
+      duration: durationMonths,
       steps,
     });
 

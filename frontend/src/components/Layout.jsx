@@ -24,19 +24,19 @@ export default function Layout({ children }) {
 
   const navLinks = [
     { path: '/dashboard', label: 'Dashboard', icon: (
-      <img src={dashboardIconUrl} alt="Dashboard" className="w-4 h-4 object-contain" />
+      <img src={dashboardIconUrl} alt="" aria-hidden="true" className="w-4 h-4 object-contain" />
     )},
     { path: '/jobs', label: 'Jobs', icon: (
-      <img src={jobsIconUrl} alt="Jobs" className="w-4 h-4 object-contain" />
+      <img src={jobsIconUrl} alt="" aria-hidden="true" className="w-4 h-4 object-contain" />
     )},
     { path: '/careerbot', label: 'CareerBot', icon: (
-      <img src={chatbotIconUrl} alt="CareerBot" className="w-4 h-4 object-contain" />
+      <img src={chatbotIconUrl} alt="" aria-hidden="true" className="w-4 h-4 object-contain" />
     )},
     { path: '/resources', label: 'Resources', icon: (
-      <img src={resourcesIconUrl} alt="Resources" className="w-4 h-4 object-contain" />
+      <img src={resourcesIconUrl} alt="" aria-hidden="true" className="w-4 h-4 object-contain" />
     )},
     { path: '/profile', label: 'Profile', icon: (
-      <img src={profileIconUrl} alt="Profile" className="w-4 h-4 object-contain" />
+      <img src={profileIconUrl} alt="" aria-hidden="true" className="w-4 h-4 object-contain" />
     )},
   ];
 

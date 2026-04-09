@@ -1,4 +1,4 @@
-# SkillBridge – AI-Powered Career Companion (SDG-8)
+# NextCareer – AI-Powered Career Companion (SDG-8)
 
 A hackathon-ready fullstack web app aligned with **UN SDG 8: Decent Work & Youth Employment**. Helps youth and job seekers with skill-based job matching, skill gap analysis, career roadmaps, and a CareerBot assistant.
 
@@ -11,7 +11,7 @@ A hackathon-ready fullstack web app aligned with **UN SDG 8: Decent Work & Youth
 ## Project Structure
 
 ```
-skillbridge/
+nextcareer/
 ├── backend/
 │   ├── server.js
 │   ├── config/ (db.js, env.js)
@@ -35,7 +35,7 @@ skillbridge/
 ### 1. Backend
 
 ```bash
-cd skillbridge/backend
+cd nextcareer/backend
 # Copy env.example.txt to .env and set MONGODB_URI, JWT_SECRET
 npm install
 npm run seed   # Seed jobs and resources
@@ -45,7 +45,7 @@ npm run dev    # Start on http://localhost:5000
 ### 2. Frontend
 
 ```bash
-cd skillbridge/frontend
+cd nextcareer/frontend
 npm install
 npm run dev    # Start on http://localhost:5173
 ```
@@ -60,11 +60,67 @@ JWT_SECRET=your-secret
 PORT=5000
 ```
 
-Create `frontend/.env` (optional):
+Create `frontend/.env`:
 
 ```
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=http://localhost:5000
 ```
+
+`VITE_API_URL` should be host-only. The frontend app automatically appends `/api`.
+
+## Render Deployment Checklist
+
+### Backend (Render Web Service)
+
+Build command:
+
+```bash
+npm install
+```
+
+Start command:
+
+```bash
+npm start
+```
+
+Required env vars:
+
+```
+NODE_ENV=production
+PORT=10000
+MONGODB_URI=<your-atlas-uri>
+JWT_SECRET=<strong-random-secret>
+GROQ_API_KEY=<optional-for-careerbot>
+CORS_ORIGINS=https://<your-frontend>.onrender.com
+```
+
+### Frontend (Render Static Site)
+
+Build command:
+
+```bash
+npm install && npm run build
+```
+
+Publish directory:
+
+```bash
+dist
+```
+
+Required env var:
+
+```
+VITE_API_URL=https://<your-backend>.onrender.com
+```
+
+### Production API Validation
+
+1. Open `https://<backend>.onrender.com/api/health` and ensure `{ "status": "ok" }` is returned.
+2. Confirm register/login works from frontend production domain.
+3. Confirm protected calls like `/api/user/profile` work with JWT token.
+4. Confirm no CORS errors in browser network console.
 
 ## Features
 

@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
 import {
   Cell,
   Legend,
@@ -9,12 +8,6 @@ import {
   Tooltip,
 } from 'recharts';
 import { getSkillName, getStrength } from '../../utils/skillStrength';
-
-const SCORE_BANDS = {
-  strong: [70, 85],
-  medium: [45, 65],
-  basic: [20, 40],
-};
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
@@ -29,43 +22,26 @@ const CATEGORY_COLORS = {
 
 const CATEGORY_ORDER = ['Technical', 'Frontend', 'AI/ML', 'Problem Solving', 'Tools', 'Versatility'];
 
-const SAMPLE_DATASET = [
-  { subject: 'Technical', score: 20 },
-  { subject: 'Frontend', score: 15 },
-  { subject: 'AI/ML', score: 25 },
-  { subject: 'Problem Solving', score: 18 },
-  { subject: 'Tools', score: 10 },
-  { subject: 'Versatility', score: 12 },
-];
-
-const hashString = (text) => {
-  const input = String(text || '');
-  let hash = 0;
-  for (let i = 0; i < input.length; i += 1) {
-    hash = ((hash << 5) - hash) + input.charCodeAt(i);
-    hash |= 0;
-  }
-  return Math.abs(hash);
+const SKILL_STRENGTH_SCORE = {
+  strong: 82,
+  medium: 60,
+  basic: 35,
 };
 
 const getScore = (skill) => {
   const strength = getStrength(skill);
-  const [min, max] = SCORE_BANDS[strength] || SCORE_BANDS.basic;
-  const spread = max - min;
-  const seed = hashString(getSkillName(skill));
-  return min + (seed % (spread + 1));
+  const base = SKILL_STRENGTH_SCORE[strength] || SKILL_STRENGTH_SCORE.basic;
+  return clamp(base, 10, 85);
 };
 
-const getCategoryScore = (skills, key) => {
+const getCategoryScore = (skills) => {
   if (!skills.length) {
-    // Keep empty categories low and still slightly varied.
-    return 10 + (hashString(key) % 11);
+    return 0;
   }
 
   const average = skills.reduce((sum, skill) => sum + getScore(skill), 0) / skills.length;
   const depthBonus = Math.min(8, Math.log2(skills.length + 1) * 3);
-  const jitter = (hashString(`${key}:${skills.length}`) % 5) - 2;
-  return clamp(Math.round(average + depthBonus + jitter), 10, 85);
+  return clamp(Math.round(average + depthBonus), 10, 85);
 };
 
 const normalizeTo100 = (rows) => {
@@ -78,7 +54,7 @@ const normalizeTo100 = (rows) => {
   const total = safeRows.reduce((sum, row) => sum + Number(row.score), 0);
 
   if (total <= 0) {
-    return SAMPLE_DATASET.map((item) => ({ ...item, percentage: item.score }));
+    return [];
   }
 
   const precise = safeRows.map((row, index) => {
@@ -142,6 +118,10 @@ const renderDonutLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, payload 
 
 export default function LearningDNAChart({ user, profile }) {
   const [activeIndex, setActiveIndex] = useState(-1);
+  const userSkills = useMemo(
+    () => (Array.isArray(user?.skills) ? user.skills : []),
+    [user?.skills],
+  );
 
   const rawData = useMemo(() => {
     if (Array.isArray(profile) && profile.length) {
@@ -151,7 +131,7 @@ export default function LearningDNAChart({ user, profile }) {
       }));
     }
 
-    const skills = user?.skills || [];
+    const skills = userSkills;
 
     const frontend = skills.filter((s) => {
       const name = getSkillName(s).toLowerCase();
@@ -173,23 +153,23 @@ export default function LearningDNAChart({ user, profile }) {
       return ['git', 'docker', 'figma', 'linux', 'aws'].some((k) => name.includes(k));
     });
 
-    const frontendScore = getCategoryScore(frontend, 'frontend');
-    const technicalScore = getCategoryScore(backend, 'technical');
-    const aiScore = getCategoryScore(aiSkills, 'ai-ml');
-    const toolsScore = getCategoryScore(tools, 'tools');
+    const frontendScore = getCategoryScore(frontend);
+    const technicalScore = getCategoryScore(backend);
+    const aiScore = getCategoryScore(aiSkills);
+    const toolsScore = getCategoryScore(tools);
 
     const problemSolvingScore = clamp(
       Math.round((technicalScore * 0.5) + (aiScore * 0.3) + (toolsScore * 0.2)),
-      10,
+      0,
       85,
     );
 
     const activeCategories = [frontend, backend, aiSkills, tools].filter((arr) => arr.length > 0).length;
     const categoryAverage = (frontendScore + technicalScore + aiScore + toolsScore) / 4;
     const versatilityRaw = skills.length === 0
-      ? 14
+      ? 0
       : (18 + (activeCategories * 8) + Math.min(12, skills.length * 0.6) + (categoryAverage * 0.2));
-    const versatilityScore = clamp(Math.round(versatilityRaw), 10, 85);
+    const versatilityScore = clamp(Math.round(versatilityRaw), 0, 85);
 
     return [
       { subject: 'Technical', score: technicalScore },
@@ -199,7 +179,7 @@ export default function LearningDNAChart({ user, profile }) {
       { subject: 'Tools', score: toolsScore },
       { subject: 'Versatility', score: versatilityScore },
     ];
-  }, [profile, user]);
+  }, [profile, userSkills]);
 
   const data = useMemo(() => normalizeTo100(rawData), [rawData]);
 
@@ -214,6 +194,24 @@ export default function LearningDNAChart({ user, profile }) {
     return '#a855f7';
   }, [data]);
 
+  const shouldRenderChart = (Array.isArray(profile) && profile.length > 0) || userSkills.length > 0;
+
+  if (!shouldRenderChart) {
+    return (
+      <section className="h-full bg-gradient-to-br from-white/5 to-purple-500/10 backdrop-blur-xl rounded-2xl border border-purple-500/25 p-6 shadow-[0_0_30px_rgba(124,58,237,0.18)]">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-white font-semibold text-lg">Learning DNA</h3>
+          <span className="text-xs px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-200 border border-purple-400/25">
+            Donut view
+          </span>
+        </div>
+        <div className="h-80 rounded-2xl border border-white/10 bg-slate-900/35 flex items-center justify-center text-center px-6">
+          <p className="text-sm text-slate-300">Add at least one skill in your profile to generate Learning DNA insights.</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="h-full bg-gradient-to-br from-white/5 to-purple-500/10 backdrop-blur-xl rounded-2xl border border-purple-500/25 p-6 shadow-[0_0_30px_rgba(124,58,237,0.18)] hover:shadow-[0_0_45px_rgba(124,58,237,0.24)] transition-all duration-300">
       <div className="flex items-center justify-between mb-4">
@@ -223,11 +221,8 @@ export default function LearningDNAChart({ user, profile }) {
         </span>
       </div>
 
-      <motion.div
+      <div
         className="h-80"
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.45, ease: 'easeOut' }}
       >
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -300,7 +295,7 @@ export default function LearningDNAChart({ user, profile }) {
 
           </PieChart>
         </ResponsiveContainer>
-      </motion.div>
+      </div>
 
       <div className="space-y-2 mt-3">
         {[...data].sort((a, b) => b.percentage - a.percentage).slice(0, 3).map((item) => (
