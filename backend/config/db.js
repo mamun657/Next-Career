@@ -19,9 +19,31 @@ const connectDB = async () => {
   }
 
   try {
-    const conn = await mongoose.connect(uri);
+    const conn = await mongoose.connect(uri, { serverSelectionTimeoutMS: 10000 });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
+    const isSrvLookupFailure =
+      typeof error.message === 'string' &&
+      (error.message.includes('querySrv ECONNREFUSED') || error.message.includes('querySrv ENOTFOUND'));
+
+    const canFallbackToLocal =
+      config.nodeEnv !== 'production' &&
+      uri.startsWith('mongodb+srv://') &&
+      isSrvLookupFailure;
+
+    if (canFallbackToLocal) {
+      const localUri = process.env.MONGODB_LOCAL_URI || 'mongodb://127.0.0.1:27017/nextcareer';
+      console.warn('Atlas SRV DNS lookup failed in development. Trying local MongoDB instead...');
+
+      try {
+        const localConn = await mongoose.connect(localUri, { serverSelectionTimeoutMS: 10000 });
+        console.log(`MongoDB Connected (local fallback): ${localConn.connection.host}`);
+        return;
+      } catch (localError) {
+        console.error('MongoDB local fallback connection error:', localError.message);
+      }
+    }
+
     console.error('MongoDB connection error:', error.message);
     process.exit(1);
   }

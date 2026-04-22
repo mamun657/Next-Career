@@ -44,6 +44,9 @@ Required environment variable:
 VITE_API_URL=https://<backend-service>.onrender.com
 ```
 
+If `VITE_API_URL` is not set, the app falls back to same-origin `/api`.
+Use this only when your host reverse-proxies `/api` to backend.
+
 ## Quick Verification
 
 1. Register a user from production frontend.

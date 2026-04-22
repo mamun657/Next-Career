@@ -95,6 +95,11 @@ GROQ_API_KEY=<optional-for-careerbot>
 CORS_ORIGINS=https://<your-frontend>.onrender.com
 ```
 
+Notes:
+
+- `CORS_ORIGINS` supports comma-separated values and wildcard patterns (example: `https://*.example.com`).
+- You can also use `FRONTEND_URL` or `FRONTEND_URLS` if preferred.
+
 ### Frontend (Render Static Site)
 
 Build command:
@@ -114,6 +119,9 @@ Required env var:
 ```
 VITE_API_URL=https://<your-backend>.onrender.com
 ```
+
+If `VITE_API_URL` is not set, the app falls back to same-origin `/api`.
+This only works if your frontend host reverse-proxies `/api` to backend.
 
 ### Production API Validation
 

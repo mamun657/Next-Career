@@ -1,13 +1,38 @@
 import axios from 'axios';
 
+const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1']);
+
 const normalizeApiBase = (rawUrl) => {
-  const fallback = 'http://localhost:5000/api';
+  const fallback = 'http://localhost:5000';
   const base = (rawUrl || fallback).trim().replace(/\/+$/, '');
   if (base.endsWith('/api')) return base;
   return `${base}/api`;
 };
 
-const API_BASE = normalizeApiBase(import.meta.env.VITE_API_URL);
+const resolveApiBase = () => {
+  const configured = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL;
+  if (configured) return normalizeApiBase(configured);
+
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (LOCAL_HOSTS.has(host)) {
+      return normalizeApiBase('http://localhost:5000');
+    }
+    // In production with no env, try same-origin /api (works behind reverse proxy).
+    return normalizeApiBase(window.location.origin);
+  }
+
+  return normalizeApiBase('http://localhost:5000');
+};
+
+const API_BASE = resolveApiBase();
+
+if (import.meta.env.PROD && !import.meta.env.VITE_API_URL && !import.meta.env.VITE_API_BASE_URL) {
+  console.warn(
+    '[NextCareer] Missing VITE_API_URL. Falling back to same-origin API base:',
+    API_BASE
+  );
+}
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -35,6 +60,8 @@ api.interceptors.response.use(
     }
 
     if (!err.response) {
+      err.isNetworkError = true;
+      err.apiBaseURL = API_BASE;
       err.message = 'Network error. Please check backend URL, CORS, and internet connection.';
     }
 

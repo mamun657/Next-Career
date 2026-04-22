@@ -22,7 +22,8 @@ export default function Login() {
       navigate('/dashboard');
     } catch (err) {
       if (!err.response) {
-        setError('Cannot reach server. Check API URL and backend CORS settings.');
+        const apiBase = err.apiBaseURL || 'configured API server';
+        setError(`Cannot reach server (${apiBase}). Check VITE_API_URL and backend CORS_ORIGINS.`);
       } else {
         setError(err.response?.data?.message || 'Login failed.');
       }
