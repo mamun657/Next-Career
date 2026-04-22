@@ -63,6 +63,7 @@ const defaultOrigins = [
   'http://127.0.0.1:5173',
   'http://localhost:5174',
   'http://127.0.0.1:5174',
+  'https://nextcareer-w6qe.onrender.com',
 ];
 
 const envOrigins = (
@@ -80,7 +81,7 @@ const corsMatchers = toOriginMatchers(allowedOrigins);
 
 console.log('[CORS] Allowed origins:', allowedOrigins.length ? allowedOrigins.join(', ') : '(none)');
 
-app.use(cors({
+const corsOptions = {
   origin(origin, callback) {
     // Allow requests with no origin (server-to-server, curl, health checks)
     if (!origin) return callback(null, true);
@@ -89,8 +90,10 @@ app.use(cors({
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-app.options('*', cors());
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
