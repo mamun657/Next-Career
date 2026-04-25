@@ -86,22 +86,3 @@ Built as a **hackathon-ready solution**, it emphasizes **transparency, accessibi
 
 ---
 
-## 📁 Project Structure
-
-nextcareer/
-├── backend/
-│ ├── server.js
-│ ├── config/
-│ ├── models/
-│ ├── routes/
-│ ├── controllers/
-│ ├── middleware/
-│ ├── utils/
-│ └── seed/
-├── frontend/
-│ └── src/
-│ ├── pages/
-│ ├── components/
-│ ├── services/
-│ └── context/
-└── README.md
