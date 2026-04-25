@@ -1,10 +1,6 @@
 # 🚀 NextCareer – AI-Powered Career Companion  
 ### 🌍 Aligning with UN SDG 8: Decent Work & Economic Growth
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-green?style=for-the-badge)](https://nextcareer-w6qe.onrender.com/)
-[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](#license)
-[![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)]
-
 ---
 
 ## 📌 Overview
